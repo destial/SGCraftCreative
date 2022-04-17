@@ -4,7 +4,6 @@ import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -47,14 +46,17 @@ public class RPlaceHandler implements Listener {
         Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             List<UUID> remove = new ArrayList<>();
             for (Map.Entry<UUID, Long> entry : placers.entrySet()) {
+                Player player = Bukkit.getPlayer(entry.getKey());
                 if (entry.getValue() <= System.currentTimeMillis()) {
                     remove.add(entry.getKey());
+                    if (player == null || player.getWorld() != world) continue;
+                    player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent());
                 } else {
-                    Player player = Bukkit.getPlayer(entry.getKey());
                     if (player == null || player.getWorld() != world) continue;
                     long left = entry.getValue() - System.currentTimeMillis();
                     left /= 1000;
-                    player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(color(stillTimerMessage.replace("{seconds}", "" + left))));
+                    TextComponent component = new TextComponent(color(stillTimerMessage.replace("{seconds}", "" + left)));
+                    player.spigot().sendMessage(ChatMessageType.ACTION_BAR, component);
                 }
             }
 
@@ -64,28 +66,22 @@ public class RPlaceHandler implements Listener {
         }, 0L, 10L);
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onInteract(PlayerInteractEvent e) {
         if (e.getAction() != Action.RIGHT_CLICK_BLOCK) return;
         if (world == null) return;
         ItemStack hand = e.getItem();
         if (hand == null) return;
-        if (!hand.getType().isBlock()) return;
+        if (!hand.getType().isOccluding()) return;
 
         Block target = e.getClickedBlock();
         if (target == null) return;
         if (target.getWorld() != world) return;
 
-        if (!e.getPlayer().hasPermission("sgcraft.admin")) {
-            e.setCancelled(true);
-        }
+        e.setCancelled(true);
 
-        if (placers.containsKey(e.getPlayer().getUniqueId())) {
-            long left = placers.get(e.getPlayer().getUniqueId()) - System.currentTimeMillis();
-            left /= 1000;
-            e.getPlayer().sendMessage(stillTimerMessage.replace("{seconds}", "" + left));
+        if (placers.containsKey(e.getPlayer().getUniqueId()))
             return;
-        }
 
         if (target.getLocation().toVector().isInAABB(bounds.getMin(), bounds.getMax())) {
             target.setType(hand.getType());

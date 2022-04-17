@@ -1,5 +1,6 @@
 package xyz.destiall.sgcraftcreative;
 
+import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import xyz.destiall.sgcraftcreative.commands.CommandHandler;
@@ -22,5 +23,6 @@ public final class SGCraftCreative extends JavaPlugin {
     @Override
     public void onDisable() {
         HandlerList.unregisterAll(this);
+        Bukkit.getScheduler().cancelTasks(this);
     }
 }
