@@ -12,8 +12,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 import xyz.destiall.sgcraftcreative.SGCraftCreative;
@@ -62,10 +65,16 @@ public class RPlaceHandler implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onBlockPlace(BlockPlaceEvent e) {
+    public void onInteract(PlayerInteractEvent e) {
+        if (e.getAction() != Action.RIGHT_CLICK_BLOCK) return;
         if (world == null) return;
-        Block place = e.getBlockPlaced();
-        if (place.getWorld() != world) return;
+        ItemStack hand = e.getItem();
+        if (hand == null) return;
+        if (!hand.getType().isBlock()) return;
+
+        Block target = e.getClickedBlock();
+        if (target == null) return;
+        if (target.getWorld() != world) return;
 
         if (!e.getPlayer().hasPermission("sgcraft.admin")) {
             e.setCancelled(true);
@@ -78,19 +87,19 @@ public class RPlaceHandler implements Listener {
             return;
         }
 
-        if (place.getLocation().toVector().isInAABB(bounds.getMin(), bounds.getMax())) {
-            Location location = place.getLocation().clone();
-            location.setY(bounds.getMinY());
-            if (place.getLocation().getY() == location.getY()) {
-                e.setCancelled(false);
-            } else {
-                location.getBlock().setType(place.getType());
-            }
+        if (target.getLocation().toVector().isInAABB(bounds.getMin(), bounds.getMax())) {
+            target.setType(hand.getType());
             placers.put(e.getPlayer().getUniqueId(), System.currentTimeMillis() + (delay * 1000));
             return;
         }
 
         e.getPlayer().sendMessage(outOfBoundsMessage);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBlockPlace(BlockPlaceEvent e) {
+        if (e.getBlockPlaced().getWorld() != world) return;
+        e.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

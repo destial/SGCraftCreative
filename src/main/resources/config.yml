@@ -6,11 +6,6 @@ r-place:
   max-z: 1000
   build-y: -60
   delay: 300 #in seconds
-  hotbar:
-    enabled: false
-    blocks:
-      - WHITE_CONCRETE
-      - RED_CONCRETE
 
 messages:
   r-place:
