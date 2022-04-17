@@ -1,0 +1,10 @@
+name: SGCraftCreative
+version: '${project.version}'
+main: xyz.destiall.sgcraftcreative.SGCraftCreative
+api-version: 1.18
+depend:
+  - PlotSquared
+commands:
+  sgcraftcreative:
+    description: SGCraft Creative
+    permission: sgcraft.admin
