@@ -16,8 +16,12 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
+import org.dynmap.DynmapAPI;
+import org.dynmap.DynmapCore;
+import org.dynmap.bukkit.DynmapPlugin;
 import xyz.destiall.sgcraftcreative.SGCraftCreative;
 
 import java.util.ArrayList;
@@ -72,13 +76,14 @@ public class RPlaceHandler implements Listener {
         if (world == null) return;
         ItemStack hand = e.getItem();
         if (hand == null) return;
+
+        e.setCancelled(true);
+
         if (!hand.getType().isOccluding()) return;
 
         Block target = e.getClickedBlock();
         if (target == null) return;
         if (target.getWorld() != world) return;
-
-        e.setCancelled(true);
 
         if (placers.containsKey(e.getPlayer().getUniqueId()))
             return;
@@ -86,6 +91,7 @@ public class RPlaceHandler implements Listener {
         if (target.getLocation().toVector().isInAABB(bounds.getMin(), bounds.getMax())) {
             target.setType(hand.getType());
             placers.put(e.getPlayer().getUniqueId(), System.currentTimeMillis() + (delay * 1000));
+            DynmapPlugin.plugin.triggerRenderOfBlock(world.getName(), target.getX(), target.getY(), target.getZ());
             return;
         }
 
@@ -110,7 +116,7 @@ public class RPlaceHandler implements Listener {
         FileConfiguration config = plugin.getConfig();
         world = Bukkit.getWorld(config.getString("r-place.world", "rPlace"));
         Vector minBounds = new Vector(config.getInt("r-place.min-x", -1000), config.getInt("r-place.build-y", -60), config.getInt("r-place.min-z", -1000));
-        Vector maxBounds = new Vector(config.getInt("r-place.max-x", 1000), minBounds.getY() + 1, config.getInt("r-place.max-z", 1000));
+        Vector maxBounds = new Vector(config.getInt("r-place.max-x", 1000), minBounds.getY(), config.getInt("r-place.max-z", 1000));
         bounds = new BoundingBox(minBounds.getX(), minBounds.getY(), minBounds.getZ(), maxBounds.getX(), maxBounds.getY(), maxBounds.getZ());
         delay = config.getLong("r-place.delay", 300);
         outOfBoundsMessage = color(config.getString("messages.r-place.out-of-bounds", "&cYou are out of bounds!"));

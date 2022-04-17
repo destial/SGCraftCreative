@@ -4,6 +4,7 @@ main: xyz.destiall.sgcraftcreative.SGCraftCreative
 api-version: 1.18
 depend:
   - PlotSquared
+  - dynmap
 commands:
   sgcraftcreative:
     description: SGCraft Creative

@@ -93,6 +93,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.dynmap</groupId>
+            <artifactId>dynmap-spigot</artifactId>
+            <version>3.4-beta-3</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>com.plotsquared</groupId>
             <artifactId>PlotSquared-Core</artifactId>
             <version>6.6.2</version>
