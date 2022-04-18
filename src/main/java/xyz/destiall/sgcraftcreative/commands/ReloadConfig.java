@@ -4,8 +4,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import xyz.destiall.sgcraftcreative.SGCraftCreative;
 
-public class ReloadConfigCommand extends AbstractCommand {
-    public ReloadConfigCommand(SGCraftCreative plugin) {
+public class ReloadConfig extends AbstractCommand {
+    public ReloadConfig(SGCraftCreative plugin) {
         super(plugin);
     }
 

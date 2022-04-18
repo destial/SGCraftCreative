@@ -18,7 +18,8 @@ public class CommandHandler implements CommandExecutor {
         commands = new HashMap<>();
 
         commands.put("homeorfind", new HomeOrFindPlot(plugin));
-        commands.put("reloadconfig", new ReloadConfigCommand(plugin));
+        commands.put("reloadconfig", new ReloadConfig(plugin));
+        commands.put("rplace", new RPlaceSetup(plugin));
     }
 
     @Override
