@@ -93,7 +93,9 @@ public class RPlaceHandler implements Listener {
                     if (entry.getValue() < delay) delay = entry.getValue();
                 }
             }
-            placers.put(e.getPlayer().getUniqueId(), System.currentTimeMillis() + (delay * 1000));
+            if (delay != 0) {
+                placers.put(e.getPlayer().getUniqueId(), System.currentTimeMillis() + (delay * 1000));
+            }
             DynmapPlugin.plugin.triggerRenderOfBlock(world.getName(), target.getX(), target.getY(), target.getZ());
             return;
         }
@@ -128,6 +130,10 @@ public class RPlaceHandler implements Listener {
         for (String key : config.getConfigurationSection("r-place.delay-groups").getKeys(false)) {
             delays.put(key, config.getLong("r-place.delay-groups." + key));
         }
+    }
+
+    public World getWorld() {
+        return world;
     }
 
     private String color(String s) {

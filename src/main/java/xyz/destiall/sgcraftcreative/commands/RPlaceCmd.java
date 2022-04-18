@@ -12,8 +12,8 @@ import xyz.destiall.sgcraftcreative.SGCraftCreative;
 import xyz.destiall.sgcraftcreative.rplace.generator.CanvasBiomeProvider;
 import xyz.destiall.sgcraftcreative.rplace.generator.CanvasGenerator;
 
-public class RPlaceSetup extends AbstractCommand {
-    public RPlaceSetup(SGCraftCreative plugin) {
+public class RPlaceCmd extends AbstractCommand {
+    public RPlaceCmd(SGCraftCreative plugin) {
         super(plugin);
     }
 
@@ -62,21 +62,27 @@ public class RPlaceSetup extends AbstractCommand {
                 });
             }
             case "tp", "teleport" -> {
-                if (!(sender instanceof Player)) {
-                    sender.sendMessage(ChatColor.RED + "You have to be a player to use this command!");
+                if (args.length < 2) {
+                    sender.sendMessage(ChatColor.RED + "Usage: /sgcraftcreative rplace teleport [player]");
                     return;
                 }
-                World world = Bukkit.getWorld("rPlace");
+                Player player = Bukkit.getPlayer(args[1]);
+                if (player == null) {
+                    sender.sendMessage(ChatColor.RED + "Invalid player!");
+                    return;
+                }
+                World world = plugin.getrPlaceHandler().getWorld();
+                if (world == null) {
+                    world = Bukkit.getWorld("rPlace");
+                }
                 if (world == null) {
                     sender.sendMessage(ChatColor.RED + "rPlace world does not exist!");
                     sender.sendMessage(ChatColor.RED + "You can set it up by doing /sgcraftcreative rplace setup");
                     return;
                 }
-                ((Player) sender).teleport(world.getSpawnLocation());
+                player.teleport(world.getSpawnLocation());
             }
-            default -> {
-                sender.sendMessage(ChatColor.RED + "Usage: /sgcraftcreative rplace [setup,tp]");
-            }
+            default -> sender.sendMessage(ChatColor.RED + "Usage: /sgcraftcreative rplace [setup,tp]");
         }
     }
 }

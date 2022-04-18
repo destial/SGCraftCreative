@@ -21,6 +21,8 @@ public class CanvasGenerator extends ChunkGenerator {
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
                 chunkData.setBlock(x, 30, z, Material.WHITE_CONCRETE);
+                chunkData.setBlock(x, 29, z, Material.WHITE_CONCRETE);
+                chunkData.setBlock(x, 28, z, Material.WHITE_CONCRETE);
             }
         }
     }

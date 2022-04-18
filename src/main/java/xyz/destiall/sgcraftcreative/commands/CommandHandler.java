@@ -19,7 +19,7 @@ public class CommandHandler implements CommandExecutor {
 
         commands.put("homeorfind", new HomeOrFindPlot(plugin));
         commands.put("reloadconfig", new ReloadConfig(plugin));
-        commands.put("rplace", new RPlaceSetup(plugin));
+        commands.put("rplace", new RPlaceCmd(plugin));
     }
 
     @Override
