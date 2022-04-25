@@ -3,9 +3,11 @@ package xyz.destiall.sgcraftcreative.rplace.generator;
 import org.bukkit.HeightMap;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.generator.BiomeProvider;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.generator.WorldInfo;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
 
@@ -25,6 +27,12 @@ public class CanvasGenerator extends ChunkGenerator {
                 chunkData.setBlock(x, 28, z, Material.WHITE_CONCRETE);
             }
         }
+    }
+
+    @Nullable
+    @Override
+    public BiomeProvider getDefaultBiomeProvider(@NotNull WorldInfo worldInfo) {
+        return new CanvasBiomeProvider();
     }
 
     @Override

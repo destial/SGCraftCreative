@@ -28,6 +28,7 @@ public final class SGCraftCreative extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (rPlaceHandler != null) rPlaceHandler.getRecorder().save();
         HandlerList.unregisterAll(this);
         Bukkit.getScheduler().cancelTasks(this);
     }

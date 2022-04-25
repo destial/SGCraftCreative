@@ -15,11 +15,14 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 import org.dynmap.bukkit.DynmapPlugin;
 import xyz.destiall.sgcraftcreative.SGCraftCreative;
+import xyz.destiall.sgcraftcreative.rplace.recorder.RPlacePlayer;
+import xyz.destiall.sgcraftcreative.rplace.recorder.RPlaceRecorder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,11 +32,15 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RPlaceHandler implements Listener {
-    private final SGCraftCreative plugin;
     private final Map<UUID, Long> placers = new ConcurrentHashMap<>();
+    private final Map<String, Long> delays = new HashMap<>();
+    private final SGCraftCreative plugin;
+    private final RPlaceRecorder recorder;
+    private final RPlacePlayer player;
+    private long currentTick;
+
     private World world;
     private BoundingBox bounds;
-    private final Map<String, Long> delays = new HashMap<>();
     private String outOfBoundsMessage;
     private String stillTimerMessage;
 
@@ -65,13 +72,19 @@ public class RPlaceHandler implements Listener {
             for (UUID uuid : remove) {
                 placers.remove(uuid);
             }
-        }, 0L, 10L);
+            currentTick++;
+        }, 1L, 1L);
+
+        recorder = new RPlaceRecorder(plugin);
+        recorder.load();
+
+        player = new RPlacePlayer(this);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInteract(PlayerInteractEvent e) {
         if (e.getAction() != Action.RIGHT_CLICK_BLOCK) return;
-        if (world == null) return;
+        if (world == null && getWorld() == null) return;
         Block target = e.getClickedBlock();
         if (target == null) return;
         if (target.getWorld() != world) return;
@@ -80,12 +93,18 @@ public class RPlaceHandler implements Listener {
 
         e.setCancelled(true);
 
-        if (!hand.getType().isOccluding()) return;
+        if (getPlayer().isPlaying()) {
+            e.getPlayer().sendMessage(ChatColor.RED + "r/place is currently replaying!");
+            return;
+        }
+
+        if (!hand.getType().isOccluding() || target.getType() == hand.getType()) return;
 
         if (placers.containsKey(e.getPlayer().getUniqueId()))
             return;
 
         if (target.getLocation().toVector().isInAABB(bounds.getMin(), bounds.getMax())) {
+
             target.setType(hand.getType());
             long delay = delays.get("default");
             for (Map.Entry<String, Long> entry : delays.entrySet()) {
@@ -96,6 +115,7 @@ public class RPlaceHandler implements Listener {
             if (delay != 0) {
                 placers.put(e.getPlayer().getUniqueId(), System.currentTimeMillis() + (delay * 1000));
             }
+            recorder.record(target, e.getPlayer().getUniqueId(), currentTick);
             DynmapPlugin.plugin.triggerRenderOfBlock(world.getName(), target.getX(), target.getY(), target.getZ());
             return;
         }
@@ -105,17 +125,25 @@ public class RPlaceHandler implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockPlace(BlockPlaceEvent e) {
-        if (world == null) return;
+        if (world == null && getWorld() == null) return;
         if (e.getBlockPlaced().getWorld() != world) return;
         e.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockBreak(BlockBreakEvent e) {
-        if (world == null) return;
+        if (world == null && getWorld() == null) return;
         Block broken = e.getBlock();
         if (broken.getWorld() != world) return;
         e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onLoadWorld(WorldLoadEvent e) {
+        if (world != null) return;
+        if (e.getWorld().getName().equals("rPlace")) {
+            world = e.getWorld();
+        }
     }
 
     public void reload() {
@@ -132,8 +160,24 @@ public class RPlaceHandler implements Listener {
         }
     }
 
+    public RPlaceRecorder getRecorder() {
+        return recorder;
+    }
+
+    public RPlacePlayer getPlayer() {
+        return player;
+    }
+
+    public BoundingBox getBounds() {
+        return bounds;
+    }
+
+    public SGCraftCreative getPlugin() {
+        return plugin;
+    }
+
     public World getWorld() {
-        return world;
+        return world = world == null ? Bukkit.getWorld("rPlace") : world;
     }
 
     private String color(String s) {

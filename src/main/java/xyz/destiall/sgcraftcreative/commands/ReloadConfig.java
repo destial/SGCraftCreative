@@ -13,6 +13,6 @@ public class ReloadConfig extends AbstractCommand {
     public void execute(CommandSender sender, String[] args) {
         plugin.reloadConfig();
         plugin.getrPlaceHandler().reload();
-        sender.sendMessage(ChatColor.GREEN + "Reloaded configuration...");
+        sender.sendMessage(ChatColor.GREEN + "Reloaded configuration.");
     }
 }
